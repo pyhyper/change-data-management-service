@@ -25,7 +25,7 @@ Hệ thống CDMS giải quyết bài toán cốt lõi: Tiếp nhận luồng d�
 
 ## 2. Cấu trúc mã nguồn
 
-Codebase được tổ chức theo kiến trúc phân tầng sạch (Clean / Layered Architecture) chuẩn TypeScript:
+Codebase được tổ chức theo kiến trúc phân tầng sạch (Clean / Layered Architecture) chuẩn Python (PEP 8 & Pydantic v2):
 
 ```text
 cdms-project/
@@ -70,7 +70,6 @@ cdms-project/
 ## 3. Yêu cầu môi trường
 
 - **Python:** Phiên bản `>= 3.11` (khuyến nghị Python 3.13).
-- **Node.js:** (Tùy chọn cho bản TypeScript tham chiếu).
 - **Docker & Docker Compose:** (Tùy chọn, dùng khi muốn chạy toàn bộ trên container hóa).
 
 ---
@@ -203,26 +202,26 @@ Phản hồi thống kê:
 
 ## 6. Hướng dẫn chạy Bộ kiểm thử (Automated Tests)
 
-Codebase đi kèm bộ kiểm thử toàn diện 100% bằng Vitest:
+Codebase đi kèm bộ kiểm thử toàn diện 100% bằng Pytest:
 
 ### Chạy toàn bộ các bài kiểm thử:
 ```bash
-npm test
+pytest
 ```
 
 ### Chạy theo từng nhóm kiểm thử chuyên biệt:
 ```bash
 # 1. Chạy Unit Test (Canonicalization, Hashing, Change Detector)
-npm run test:unit
+pytest tests/unit
 
 # 2. Chạy Integration Test (Webhook, Excel, Polling Scheduler)
-npm run test:integration
+pytest tests/integration
 
 # 3. Chạy Concurrency Test (CT-01, CT-02, CT-03, CT-04)
-npm run test:concurrency
+pytest tests/concurrency
 
 # 4. Chạy Failure Injection & Recovery Test (FT-01, FT-02)
-npm run test:failure
+pytest tests/failure
 ```
 
 ### Kịch bản kiểm thử tải đột biến với k6 (Spike Load Testing):
@@ -237,13 +236,13 @@ k6 run tests/load/k6-spike-test.js
 
 | Mã yêu cầu | Yêu cầu nghiệp vụ | Trạng thái triển khai | Vị trí mã nguồn kiểm chứng |
 |---|---|---|---|
-| **FR-01** | Giả lập Vietful Inventory Service | Đã hoàn thành | `apps/inventory-emulator/` |
-| **FR-02** | Scheduled Polling với Checkpoint | Đã hoàn thành | `apps/cdms/src/ingestion/polling/` |
-| **FR-03** | Webhook Callback hỗ trợ Idempotency | Đã hoàn thành | `apps/cdms/src/api/controllers/webhook.controller.ts` |
-| **FR-04** | Upload Excel `.xlsx` có thống kê chi tiết | Đã hoàn thành | `apps/cdms/src/ingestion/excel/` |
-| **FR-05** | Chỉ lưu dữ liệu mới/thay đổi | Đã hoàn thành | `apps/cdms/src/processing/detector/` |
-| **NFR-01** | Exactly-once update effect tại Database | Đã hoàn thành | `tests/concurrency/concurrent.test.ts` (CT-01 đến CT-04) |
-| **NFR-02** | Chống chịu lỗi và khôi phục giao dịch | Đã hoàn thành | `tests/failure/failure.test.ts` (FT-01, FT-02) |
+| **FR-01** | Giả lập Vietful Inventory Service | Đã hoàn thành | `src/emulator/` |
+| **FR-02** | Scheduled Polling với Checkpoint | Đã hoàn thành | `src/cdms/ingestion/polling.py` |
+| **FR-03** | Webhook Callback hỗ trợ Idempotency | Đã hoàn thành | `src/cdms/api/router.py` |
+| **FR-04** | Upload Excel `.xlsx` có thống kê chi tiết | Đã hoàn thành | `src/cdms/ingestion/excel.py` |
+| **FR-05** | Chỉ lưu dữ liệu mới/thay đổi | Đã hoàn thành | `src/cdms/processing/detector.py` |
+| **NFR-01** | Exactly-once update effect tại Database | Đã hoàn thành | `tests/concurrency/test_concurrency.py` (CT-01 đến CT-04) |
+| **NFR-02** | Chống chịu lỗi và khôi phục giao dịch | Đã hoàn thành | `tests/failure/test_failure.py` (FT-01, FT-02) |
 | **NFR-03** | Khả năng container hóa bằng Docker Compose | Đã hoàn thành | `docker-compose.yml`, `Dockerfile.*` |
 
 ---
@@ -255,7 +254,7 @@ Tuân thủ quy định tại mục 19 của tài liệu `DESIGN.md`:
 ### Các phần có sự hỗ trợ của AI:
 - Gợi ý cấu trúc phân tầng kiến trúc và phác thảo tài liệu kỹ thuật ban đầu.
 - Hỗ trợ xây dựng các kịch bản kiểm thử cạnh tranh (Concurrency Tests) và phục hồi lỗi (Failure Tests).
-- Đề xuất các cấu hình tối ưu TypeScript compiler flags và container multi-stage build.
+- Đề xuất các cấu hình tối ưu Pydantic models và container multi-stage build.
 
 ### Các phần do người phát triển chịu trách nhiệm và làm chủ:
 - Ra quyết định lựa chọn kiến trúc xử lý Exactly-Once tập trung tại một pipeline chung.
