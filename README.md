@@ -200,9 +200,18 @@ Phản hồi thống kê:
 
 ---
 
-## 6. Hướng dẫn chạy Bộ kiểm thử (Automated Tests)
+## 6. Hướng dẫn chạy Bộ kiểm thử và Demo (Automated Tests & Demo)
 
-Codebase đi kèm bộ kiểm thử toàn diện 100% bằng Pytest:
+Chi tiết quy trình demo từng bước và kết quả mong đợi xem tại [TESTING_GUIDE.md](TESTING_GUIDE.md).
+
+### Chạy nhanh toàn bộ Demo & Kiểm thử bằng 1 lệnh:
+```bash
+./scripts/run_demo.sh
+```
+
+Lệnh trên sẽ tự động thực thi 9 kịch bản đầu cuối (Health, Webhook Insert, Webhook Idempotent Duplicate, Webhook No-Change, Webhook Stale, Excel Upload phân loại dòng, Excel Upload duplicate, Query History, và chạy trọn vẹn bộ Pytest).
+
+### Hoặc chạy từng bước thủ công với Pytest:
 
 ### Bước 1: Kích hoạt môi trường ảo (Bắt buộc)
 Trước khi chạy test hoặc các lệnh của dự án, đảm bảo đã kích hoạt môi trường ảo Python:
