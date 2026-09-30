@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cdms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cdms_user
+      POSTGRES_PASSWORD: cdms_password
+      POSTGRES_DB: cdms_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./apps/cdms/src/db/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_initial_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cdms_user -d cdms_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  inventory-emulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.emulator
+    container_name: cdms-inventory-emulator
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      INVENTORY_PORT: 3001
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  cdms:
+    build:
+      context: .
+      dockerfile: Dockerfile.cdms
+    container_name: cdms-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://cdms_user:cdms_password@postgres:5432/cdms_db
+      INVENTORY_BASE_URL: http://inventory-emulator:3001
+      POLLING_ENABLED: "true"
+      POLLING_INTERVAL_MS: 10000
+      NODE_ENV: production
+      LOG_LEVEL: info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      inventory-emulator:
+        condition: service_healthy
+
+volumes:
+  pgdata:
