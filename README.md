@@ -29,35 +29,23 @@ Codebase được tổ chức theo kiến trúc phân tầng sạch (Clean / Lay
 
 ```text
 cdms-project/
-├── apps/
-│   ├── cdms/                                # Dịch vụ cốt lõi CDMS
-│   │   └── src/
-│   │       ├── api/                         # Tầng giao diện HTTP REST
-│   │       │   ├── controllers/             # Webhook, Excel, Change controllers
-│   │       │   ├── middlewares/             # Request Logger, Error Handler
-│   │       │   └── routes/                  # Định tuyến endpoint
-│   │       ├── config/                      # Cấu hình biến môi trường qua Zod
-│   │       ├── domain/                      # Models, Exception classes, Zod Schemas
-│   │       ├── ingestion/                   # Triển khai 3 luồng tiếp nhận
-│   │       │   ├── webhook/                 # Webhook handler logic
-│   │       │   ├── excel/                   # Parser và validator file .xlsx
-│   │       │   └── polling/                 # Inventory client và Polling scheduler
-│   │       ├── processing/                  # Pipeline xử lý dữ liệu chung
-│   │       │   ├── canonical/               # Chuẩn hóa JSON và tính hash SHA-256
-│   │       │   ├── detector/                # Change detector (INSERTED, NO_CHANGE, STALE)
-│   │       │   └── pipeline/                # ChangeProcessor điều phối transaction
-│   │       ├── repositories/                # Idempotency, Change, Checkpoint repositories
-│   │       ├── db/                          # Database connection pool và SQL migrations
-│   │       └── app.ts                       # Điểm khởi chạy CDMS Service
+├── src/
+│   ├── cdms/                                # Dịch vụ cốt lõi CDMS (Python FastAPI)
+│   │   ├── api/                             # Router và REST Endpoints
+│   │   ├── config.py                        # Cấu hình biến môi trường
+│   │   ├── domain/                          # Models (Pydantic v2) và Exceptions
+│   │   ├── ingestion/                       # Webhook, Excel (openpyxl), Polling (httpx)
+│   │   ├── processing/                      # Canonicalization, SHA-256 hash, ChangeProcessor
+│   │   ├── repositories/                    # Idempotency, Change, Checkpoint repositories
+│   │   ├── db/                              # Asyncpg + MemoryDatabaseClient cho local/test
+│   │   └── main.py                          # Khởi chạy CDMS trên cổng 3000
 │   │
-│   └── inventory-emulator/                  # Dịch vụ giả lập Vietful Inventory Service
-│       └── src/
-│           ├── api/                         # Endpoints truy vấn và mô phỏng lỗi
-│           ├── store/                       # Kho lưu trữ in-memory hỗ trợ delay/fail
-│           ├── seed/                        # Tự động sinh dữ liệu mẫu với Faker
-│           └── app.ts                       # Điểm khởi chạy Inventory Emulator
+│   └── emulator/                            # Giả lập Vietful Inventory Service (Python)
+│       ├── store.py                         # Kho lưu trữ in-memory hỗ trợ tiêm lỗi
+│       ├── seed.py                          # Tự động sinh dữ liệu mẫu với Faker
+│       └── main.py                          # Khởi chạy Emulator trên cổng 3001
 │
-├── tests/                                   # Bộ kiểm thử tự động
+├── tests/                                   # Bộ kiểm thử tự động toàn diện với Pytest
 │   ├── unit/                                # Kiểm thử độc lập canonicalization & detector
 │   ├── integration/                         # Kiểm thử tích hợp Webhook, Excel, Polling
 │   ├── concurrency/                         # Kiểm thử tương tranh CT-01 đến CT-04
@@ -65,15 +53,16 @@ cdms-project/
 │   └── load/                                # Kịch bản kiểm thử tải đột biến với k6
 │
 ├── docker-compose.yml                       # Khởi chạy toàn bộ hệ thống bằng 1 lệnh
-├── Dockerfile.cdms                          # Multi-stage Docker build cho CDMS
-├── Dockerfile.emulator                      # Multi-stage Docker build cho Emulator
+├── Dockerfile.cdms                          # Docker build cho CDMS Python service
+├── Dockerfile.emulator                      # Docker build cho Emulator Python service
+├── requirements.txt                         # Danh sách thư viện Python
+├── pytest.ini                               # Cấu hình kiểm thử tự động Pytest
 ├── SPEC.md                                  # Đặc tả yêu cầu bài test
 ├── ARCHITECTURE.md                          # Thiết kế kiến trúc tổng thể
 ├── DESIGN.md                                # Thiết kế kỹ thuật chi tiết
 ├── PLAN.md                                  # Kế hoạch triển khai theo milestone
 ├── CODING_STANDARDS.md                      # Tiêu chuẩn và quy tắc viết code
-├── vitest.config.ts                         # Cấu hình kiểm thử tự động
-└── package.json                             # Cấu hình dự án và dependencies
+└── README.md                                # Cẩm nang hướng dẫn vận hành dự án
 ```
 
 ---

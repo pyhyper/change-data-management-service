@@ -1,22 +1,9 @@
-FROM node:23-alpine AS builder
+FROM python:3.13-slim
 
 WORKDIR /app
-COPY package*.json tsconfig.json ./
-RUN npm ci
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY apps/inventory-emulator ./apps/inventory-emulator
-COPY apps/cdms ./apps/cdms
-RUN npm run build
-
-FROM node:23-alpine AS runner
-
-WORKDIR /app
-ENV NODE_ENV=production
-
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-COPY --from=builder /app/dist ./dist
-
+COPY src ./src
 EXPOSE 3001
-CMD ["node", "dist/apps/inventory-emulator/src/app.js"]
+CMD ["uvicorn", "src.emulator.main:app", "--host", "0.0.0.0", "--port", "3001"]

@@ -9,32 +9,51 @@
 
 ```text
 cdms-project/
-├─ apps/
+├─ src/
 │  ├─ cdms/
-│  │  └─ src/
-│  │     ├─ api/
-│  │     ├─ config/
-│  │     ├─ domain/
-│  │     ├─ ingestion/
-│  │     │  ├─ webhook/
-│  │     │  ├─ excel/
-│  │     │  └─ polling/
-│  │     ├─ processing/
-│  │     ├─ repositories/
-│  │     ├─ db/
-│  │     └─ app.ts
+│  │  ├─ api/
+│  │  │  └─ router.py
+│  │  ├─ config.py
+│  │  ├─ domain/
+│  │  │  ├─ models.py
+│  │  │  └─ exceptions.py
+│  │  ├─ ingestion/
+│  │  │  ├─ webhook.py
+│  │  │  ├─ excel.py
+│  │  │  └─ polling.py
+│  │  ├─ processing/
+│  │  │  ├─ canonical.py
+│  │  │  ├─ idempotency.py
+│  │  │  ├─ detector.py
+│  │  │  └─ pipeline.py
+│  │  ├─ repositories/
+│  │  │  ├─ change_repo.py
+│  │  │  ├─ idempotency_repo.py
+│  │  │  └─ checkpoint_repo.py
+│  │  ├─ db/
+│  │  │  ├─ client.py
+│  │  │  ├─ memory_db.py
+│  │  │  ├─ postgres_db.py
+│  │  │  └─ migrations/
+│  │  │     └─ 001_initial_schema.sql
+│  │  └─ main.py
 │  │
-│  └─ inventory-emulator/
-│     └─ src/
-│        ├─ api/
-│        ├─ store/
-│        └─ seed/
+│  └─ emulator/
+│     ├─ store.py
+│     ├─ seed.py
+│     └─ main.py
 │
 ├─ tests/
+│  ├─ unit/
 │  ├─ integration/
+│  ├─ concurrency/
 │  ├─ failure/
 │  └─ load/
 ├─ docker-compose.yml
+├─ Dockerfile.cdms
+├─ Dockerfile.emulator
+├─ requirements.txt
+├─ pytest.ini
 ├─ SPEC.md
 ├─ ARCHITECTURE.md
 ├─ DESIGN.md

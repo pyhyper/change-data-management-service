@@ -21,7 +21,7 @@ services:
   inventory-emulator:
     build:
       context: .
-      dockerfile: Dockerfile.py_emulator
+      dockerfile: Dockerfile.emulator
     container_name: cdms-inventory-emulator
     restart: unless-stopped
     ports:
@@ -37,7 +37,7 @@ services:
   cdms:
     build:
       context: .
-      dockerfile: Dockerfile.py_cdms
+      dockerfile: Dockerfile.cdms
     container_name: cdms-api
     restart: unless-stopped
     ports:
