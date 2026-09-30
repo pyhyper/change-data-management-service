@@ -204,9 +204,24 @@ Phản hồi thống kê:
 
 Codebase đi kèm bộ kiểm thử toàn diện 100% bằng Pytest:
 
-### Chạy toàn bộ các bài kiểm thử:
+### Bước 1: Kích hoạt môi trường ảo (Bắt buộc)
+Trước khi chạy test hoặc các lệnh của dự án, đảm bảo đã kích hoạt môi trường ảo Python:
+```bash
+# Tạo venv và cài đặt dependencies (nếu chưa thực hiện):
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Hoặc kích hoạt môi trường ảo đã có:
+source .venv/bin/activate
+```
+
+### Bước 2: Chạy toàn bộ các bài kiểm thử:
 ```bash
 pytest
+
+# Hoặc chạy trực tiếp qua đường dẫn venv không cần activate:
+# .venv/bin/pytest
 ```
 
 ### Chạy theo từng nhóm kiểm thử chuyên biệt:
