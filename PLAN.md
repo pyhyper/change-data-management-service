@@ -34,7 +34,7 @@ Không nên làm cả 3 ingestion source trước khi exactly-once core đã ổ
 Tasks:
 
 - [ ] Init Git repository.
-- [ ] Init Node.js + TypeScript workspace.
+- [x] Init Python FastAPI workspace (PEP 8, Pydantic v2).
 - [ ] Tạo `cdms` service.
 - [ ] Tạo `inventory-emulator`.
 - [ ] Tạo PostgreSQL container.

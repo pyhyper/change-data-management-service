@@ -43,7 +43,7 @@ Ba đường dữ liệu đều hội tụ vào **Change Processing Pipeline**. 
 flowchart TB
     subgraph HOST[Single Machine]
         subgraph DC[Docker Compose]
-            A[cdms-api / Node.js + TypeScript]
+            A[cdms-api / Python FastAPI]
             B[inventory-emulator]
             C[(PostgreSQL)]
         end
@@ -392,30 +392,27 @@ sequenceDiagram
 
 ---
 
-## 10. Technology selection [ĐỀ XUẤT]
+## 10. Technology selection [ĐÃ TRIỂN KHAI]
 
 ### Runtime
 
-- Node.js
-- TypeScript
-- Express
+- Python 3.13
+- FastAPI (High-performance Async Web Framework)
+- Uvicorn (ASGI Server)
 
 ### Database
 
-- PostgreSQL
-- Prisma ORM hoặc `pg`
-
-> Với phần exactly-once/concurrency, raw SQL transaction trong repository thường minh bạch hơn ORM abstraction.
+- PostgreSQL 16
+- `asyncpg` (Asynchronous PostgreSQL client) kết hợp raw SQL transaction minh bạch, kiểm soát locking cấp độ transaction.
+- `MemoryDatabaseClient` tích hợp sẵn phục vụ chạy unit/integration test không phụ thuộc infrastructure ngoài.
 
 ### Supporting libraries
 
-- `zod` — validation
-- `exceljs` — Excel import
-- `@faker-js/faker` — inventory seed/emulator
-- `node-cron` — polling schedule
-- `pino` — structured logging
-- `vitest` hoặc `jest`
-- `supertest`
+- `pydantic` v2 — schema validation & data contracts
+- `openpyxl` — Excel `.xlsx` stream import
+- `faker` — inventory seed & test data generation
+- `httpx` — asynchronous HTTP client cho Polling & Webhook
+- `pytest` & `pytest-asyncio` — automated test runner
 - `k6` — spike/load test
 
 ### Deployment

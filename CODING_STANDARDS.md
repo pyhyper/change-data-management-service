@@ -43,101 +43,60 @@
 
 ---
 
-## 3. Quy chuẩn Ngôn ngữ Lập trình (Python & TypeScript)
+## 3. Quy chuẩn Ngôn ngữ Lập trình (Python PEP 8 & Pydantic v2)
 
-### 3.1 Quy chuẩn Backend Python (PEP 8 & Pydantic v2)
+### 3.1 Tiêu chuẩn và Kiểu dữ liệu (Typing & Validation)
 1. **Tiêu chuẩn phiên bản:** Python 3.11+ (khuyến nghị Python 3.13).
 2. **Khai báo kiểu dữ liệu bắt buộc (Type Hints):**
    - Mọi hàm, phương thức, thuộc tính bắt buộc khai báo Type Annotations (`typing`).
-   - Sử dụng Pydantic v2 `BaseModel` để validate toàn bộ dữ liệu đi vào hệ thống (DTO).
-   - Hạn chế dùng `Any`; ưu tiên dùng TypeVar, Union, hoặc Generic có ràng buộc.
-3. **Lập trình Bất đồng bộ (Asyncio):**
-   - Tận dụng `async/await` với FastAPI, `httpx.AsyncClient` và `asyncpg`.
-   - Cấm sử dụng các lời gọi blocking I/O (như `time.sleep()`, đồng bộ socket) trong async loop; bắt buộc dùng `asyncio.sleep()` hoặc offload sang thread pool.
-4. **Định dạng mã nguồn:** Tuân thủ chặt chẽ PEP 8 (indentation 4 spaces, snake_case cho hàm/biến, PascalCase cho class, UPPER_SNAKE_CASE cho hằng số).
-
-### 3.2 Cấu hình trình biên dịch TypeScript (Tham chiếu)
-Dự án bắt buộc bật các cờ nghiêm ngặt sau:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true
-  }
-}
-```
-
-### 3.2 Quy định về kiểu dữ liệu (Typing Rules)
-- **Cấm sử dụng kiểu `any`:** Trong mọi trường hợp, không dùng `any`. Nếu chưa xác định được kiểu cụ thể, dùng `unknown` và tiến hành type guard hoặc parse qua schema validator trước khi sử dụng.
-- **Hạn chế Type Assertion (`as Type`):** Không dùng `as` để bypass kiểm tra kiểu của TypeScript. Chỉ chấp nhận assertion khi làm việc với thư viện ngoài thiếu type definition chuẩn, và phải đi kèm ghi chú giải thích.
-- **Sử dụng `interface` và `type` đúng mục đích:**
-  - Dùng `interface` để định nghĩa hợp đồng của Object, Service, Repository có thể kế thừa hoặc implement.
-  - Dùng `type` cho Union types, Intersection types, Tuple, Primitive alias, hoặc Utility types.
-- **Thuộc tính bất biến (Immutability):**
-  - Khai báo biến mặc định bằng `const`. Chỉ dùng `let` khi thực sự cần thay đổi giá trị. Cấm dùng `var`.
-  - Dùng `readonly` cho các thuộc tính đối tượng không được phép sửa đổi sau khi khởi tạo.
+   - Sử dụng Pydantic v2 `BaseModel` để validate toàn bộ dữ liệu đi vào hệ thống (DTO / Request Payload).
+   - Hạn chế dùng `Any`; ưu tiên dùng TypeVar, Union (`|`), Generic có ràng buộc hoặc Model cụ thể.
+3. **Thuộc tính bất biến (Immutability):**
+   - Đối với các Value Objects và DTO không thay đổi, sử dụng `@dataclass(frozen=True)` hoặc Pydantic `model_config = ConfigDict(frozen=True)`.
 
 Ví dụ chuẩn:
 
-```ts
-// ĐÚNG
-export interface ProductChangeCommand {
-  readonly productId: string;
-  readonly sku: string;
-  readonly name: string;
-  readonly quantity: number;
-  readonly price: number;
-  readonly sourceUpdatedAt: Date;
-}
+```python
+# ĐÚNG
+from datetime import datetime
+from pydantic import BaseModel, Field
 
-// SAI
-export interface ProductChangeCommand {
-  productId: any;
-  sku?: string;
-  name: any;
-  quantity: number;
-  price: number;
-  sourceUpdatedAt: any;
-}
+class ProductChangeCommand(BaseModel):
+    product_id: str = Field(..., min_length=1)
+    sku: str | None = None
+    name: str = Field(..., min_length=1)
+    quantity: int = Field(default=0, ge=0)
+    price: float = Field(default=0.0, ge=0.0)
+    source_updated_at: datetime
+
+# SAI
+class ProductChangeCommand:
+    def __init__(self, product_id, sku, name, quantity, price, source_updated_at):
+        self.product_id = product_id
+        # Không khai báo kiểu dữ liệu, không có validation
 ```
 
-### 3.3 Xử lý bất đồng bộ (Asynchronous Code)
-- Luôn sử dụng cú pháp `async/await`. Cấm sử dụng callback style lồng nhau hoặc chuỗi `.then().catch()` trộn lẫn với `async/await`.
-- Tất cả các Promise trả về phải được xử lý hoặc await. Tuyệt đối không để xảy ra unhandled promise rejections.
-- Khi cần thực thi nhiều tác vụ song song độc lập, sử dụng `Promise.all()` hoặc `Promise.allSettled()`. Nếu các tác vụ phụ thuộc thứ tự, phải thực thi tuần tự.
+### 3.2 Lập trình Bất đồng bộ (Asyncio)
+- Tận dụng `async/await` với FastAPI, `httpx.AsyncClient` và `asyncpg`.
+- Cấm sử dụng các lời gọi blocking I/O (như `time.sleep()`, đồng bộ socket) trong async loop; bắt buộc dùng `asyncio.sleep()` hoặc offload sang thread pool.
+- Khi cần thực thi nhiều tác vụ song song độc lập, sử dụng `asyncio.gather()`. Nếu cần kiểm soát tương tranh trên file/batch lớn, bắt buộc chia lô (batching) để tránh cạn kiệt connection pool.
 
 ---
 
 ## 4. Quy ước đặt tên (Naming Conventions)
 
-### 4.1 Bảng quy chuẩn tổng quát
+### 4.1 Bảng quy chuẩn tổng quát (Python PEP 8)
 
 | Thành phần | Quy tắc | Ví dụ chuẩn | Ví dụ sai |
 |---|---|---|---|
-| Thư mục | `kebab-case` | `change-detector`, `excel-parser` | `ChangeDetector`, `excel_parser` |
-| Tệp mã nguồn | `kebab-case.ts` | `product.repository.ts`, `hash.util.ts` | `productRepository.ts`, `HashUtil.ts` |
-| Lớp (Class) | `PascalCase` | `PostgresChangeRepository`, `ChangePipeline` | `postgres_change_repository`, `changePipeline` |
-| Giao diện (Interface) | `PascalCase` | `ProductRepository`, `IdempotencyHandler` | `IProductRepository`, `product_interface` |
-| Kiểu (Type alias) | `PascalCase` | `IngestionSource`, `NormalizationResult` | `ingestion_source`, `TNormalization` |
-| Biến / Thuộc tính | `camelCase` | `payloadHash`, `retryCount`, `updatedAt` | `payload_hash`, `RetryCount` |
-| Hàm / Phương thức | `camelCase` (động từ) | `calculateHash()`, `findProductById()` | `Hash()`, `product_by_id()` |
+| Thư mục | `snake_case` | `cdms`, `ingestion`, `processing` | `ChangeDetector`, `excel-parser` |
+| Tệp mã nguồn | `snake_case.py` | `change_repo.py`, `canonical.py` | `product.repository.ts`, `HashUtil.py` |
+| Lớp (Class) | `PascalCase` | `PostgresDatabaseClient`, `ChangeProcessor` | `postgres_db_client`, `changeProcessor` |
+| Biến / Thuộc tính | `snake_case` | `payload_hash`, `retry_count`, `updated_at` | `payloadHash`, `RetryCount` |
+| Hàm / Phương thức | `snake_case` (động từ) | `compute_payload_hash()`, `get_product_by_id()` | `ComputeHash()`, `product_by_id` |
 | Hằng số toàn cục | `UPPER_SNAKE_CASE` | `MAX_RETRY_ATTEMPTS`, `DEFAULT_BATCH_SIZE` | `maxRetryAttempts`, `default_batch` |
-| Biến logic (Boolean) | Tiền tố vị ngữ (`is`, `has`, `can`, `should`) | `isDuplicate`, `hasChanged`, `canRetry` | `duplicate`, `changed`, `retryFlag` |
-| Bảng cơ sở dữ liệu | `snake_case` (số nhiều) | `change_records`, `idempotency_keys` | `ChangeRecords`, `changeRecord` |
+| Biến logic (Boolean) | Tiền tố vị ngữ (`is_`, `has_`, `can_`, `should_`) | `is_duplicate`, `has_changed`, `can_retry` | `duplicate`, `changed`, `retry_flag` |
+| Bảng cơ sở dữ liệu | `snake_case` (số nhiều) | `product_changes`, `ingestion_events` | `ProductChanges`, `changeRecord` |
 | Cột cơ sở dữ liệu | `snake_case` | `product_id`, `payload_hash`, `created_at` | `productId`, `PayloadHash` |
 
 ### 4.2 Quy định về tiền tố Interface

@@ -591,7 +591,7 @@ Candidate-owned work:
 
 AI was used for:
 - Sinh mã nguồn khung (boilerplate / scaffolding) theo đúng prompt kỹ thuật chi tiết của ứng viên.
-- Chuyển đổi mã nguồn và định dạng sang chuẩn Python (FastAPI, Pydantic v2, Asyncpg).
+- Đề xuất tối ưu hóa cấu trúc Pydantic v2 models, typing hints và cấu hình Dockerfile multi-stage.
 - Đề xuất và mở rộng các test fixtures, kịch bản kiểm thử cạnh tranh (Concurrency) và tiêm lỗi (Failure).
 - Hỗ trợ rà soát cú pháp tài liệu kỹ thuật theo định hướng kiến trúc đã vạch ra.
 ```
