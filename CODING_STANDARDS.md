@@ -430,29 +430,69 @@ Tên nhánh sử dụng chữ thường, phân tách bằng dấu gạch chéo v
 - `test/<tên-kịch-bản>`: Thêm test case hoặc kịch bản tải (ví dụ: `test/k6-spike-load`).
 - `refactor/<nội-dung>`: Tái cấu trúc mã nguồn không thay đổi logic (ví dụ: `refactor/normalize-module`).
 
-### 12.2 Quy ước viết Commit Message (Conventional Commits)
-Định dạng bắt buộc: `<type>(<scope>): <mô tả ngắn bằng tiếng Anh hoặc tiếng Việt>`
+### 12.2 Quy ước viết Commit Message theo chuẩn Conventional Commits 1.0.0
 
-Các `type` được phép sử dụng:
-- `feat`: Tính năng mới.
-- `fix`: Sửa lỗi.
-- `refactor`: Tái cấu trúc mã nguồn.
-- `test`: Thêm hoặc cập nhật mã kiểm thử.
-- `docs`: Cập nhật tài liệu (SPEC, ARCHITECTURE, DESIGN, PLAN, CODING_STANDARDS).
-- `chore`: Thay đổi cấu hình build, dependency, không liên quan mã nguồn chính.
+Mọi commit trong dự án bắt buộc phải tuân theo đặc tả chuẩn quốc tế **Conventional Commits 1.0.0**. Cấu trúc mỗi commit message bao gồm:
 
-Ví dụ chuẩn:
-- `feat(ingestion): implement streaming parser for large excel files`
-- `fix(pipeline): prevent duplicate record insertion under concurrent webhooks`
-- `test(load): add k6 spike test script for 500 rps`
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### 1. Bảng danh mục Type chuẩn
+
+| Type | Ý nghĩa và mục đích | Mức Semantic Versioning | Ví dụ thực tế trong dự án |
+|---|---|---|---|
+| `feat` | Thêm tính năng nghiệp vụ mới | MINOR (0.x.0) | `feat(ingestion): add streaming openpyxl parser for excel` |
+| `fix` | Sửa lỗi trong mã nguồn | PATCH (0.0.x) | `fix(pipeline): prevent duplicate insertion under race condition` |
+| `refactor` | Tái cấu trúc mã nguồn không đổi hành vi | PATCH (0.0.x) | `refactor(cleanup): remove nodejs files and migrate to python` |
+| `perf` | Cải tiến tối ưu hiệu năng | PATCH (0.0.x) | `perf(canonical): optimize key sorting recursion for nested dict` |
+| `test` | Thêm mới hoặc bổ sung bài kiểm thử | Không tăng version | `test(concurrency): add ct-01 scenario for 100 concurrent webhooks` |
+| `docs` | Thêm hoặc sửa đổi tài liệu kỹ thuật | Không tăng version | `docs(spec): clarify acceptance criteria for scheduled polling` |
+| `build` | Thay đổi file build hoặc dependencies | PATCH (0.0.x) | `build(deps): add asyncpg and openpyxl to requirements.txt` |
+| `ci` | Thay đổi cấu hình CI/CD tự động | Không tăng version | `ci(github): add automated pytest action workflow` |
+| `chore` | Tác vụ phụ trợ, bảo trì cấu hình | Không tăng version | `chore(git): update gitignore to exclude pytest cache and venv` |
+| `revert` | Hoàn tác lại một commit trước đó | Tùy ngữ cảnh | `revert: revert "feat(cdms): experimental memory lock"` |
+
+#### 2. Quy ước Scope (Phạm vi ảnh hưởng)
+Scope được đặt trong dấu ngoặc đơn ngay sau Type, phản ánh chính xác module hoặc phân vùng chức năng:
+- Ingestion: `(webhook)`, `(excel)`, `(polling)`
+- Lõi xử lý: `(pipeline)`, `(detector)`, `(canonical)`, `(idempotency)`
+- Cơ sở dữ liệu: `(db)`, `(migrations)`, `(repo)`
+- Dịch vụ giả lập: `(emulator)`, `(store)`, `(seed)`
+- Cấu hình hạ tầng: `(docker)`, `(config)`, `(deps)`
+
+#### 3. Quy tắc định dạng câu mô tả (Description)
+1. **Sử dụng thể mệnh lệnh hiện tại (Imperative mood):** Dùng động từ nguyên mẫu như `add`, `fix`, `implement`, `update`, `remove` (không dùng quá khứ như `added`, `fixed` hay tiếp diễn `adding`).
+2. **Không viết hoa chữ cái đầu tiên:** Viết chữ thường cho ký tự đầu của description (trừ tên riêng hoặc hằng số).
+3. **Không đặt dấu chấm ở cuối:** Dòng tiêu đề không kết thúc bằng dấu chấm (`.`).
+4. **Giới hạn độ dài:** Dòng tiêu đề không vượt quá 72 ký tự để đảm bảo hiển thị tối ưu trên GitHub và terminal.
+
+#### 4. Quy tắc Breaking Changes (Thay đổi phá vỡ tương thích)
+- Đặt dấu chấm than `!` ngay trước dấu hai chấm: `<type>(<scope>)!: <description>`
+- Hoặc ghi rõ đoạn `BREAKING CHANGE: <mô tả chi tiết>` tại phần Footer của commit.
+- Ví dụ: `feat(api)!: change date format in webhook payload to strict iso8601`
+
+#### 5. Bảng đối chiếu ví dụ chuẩn và ví dụ sai
+
+| Commit đạt chuẩn (Do) | Commit không đạt chuẩn (Don't) | Lý do vi phạm |
+|---|---|---|
+| `feat(webhook): add idempotency key header validation` | `Added webhook validation` | Thiếu type/scope, dùng quá khứ `Added`. |
+| `fix(polling): advance checkpoint only after batch commit` | `fix bug in polling.` | Description mơ hồ, có dấu chấm cuối dòng. |
+| `test(failure): add lost response simulation test case` | `Update test` | Thiếu type chuẩn, viết hoa chữ cái đầu. |
+| `docs(readme): add curl examples for excel upload api` | `docs: Cập nhật README` | Quá ngắn, không nêu rõ nội dung thay đổi. |
+| `refactor(db): extract memory database into separate module` | `refactor code` | Scope trống, description không có ý nghĩa. |
 
 ### 12.3 Tiêu chí nghiệm thu trước khi tạo Pull Request (Definition of Done)
 Một PR chỉ được coi là hoàn thiện khi đáp ứng đủ các điều kiện sau:
-1. Trình biên dịch TypeScript chạy không có bất kỳ lỗi hoặc cảnh báo nào (`npm run build`).
-2. Toàn bộ Unit Test và Integration Test chạy thành công (`npm run test`).
-3. Mã nguồn tuân thủ đầy đủ quy chuẩn đặt tên và phân tầng kiến trúc trong tài liệu này.
-4. Không có file nhạy cảm (`.env`, log, binary rác) bị commit vào git.
-5. Đã cập nhật tài liệu liên quan (`DESIGN.md` hoặc `SPEC.md`) nếu có sự thay đổi về schema hoặc endpoint API.
+1. Toàn bộ Unit, Integration, Concurrency và Failure Tests chạy thành công 100% (`pytest`).
+2. Mã nguồn tuân thủ đầy đủ chuẩn PEP 8 và có đầy đủ Type Annotations (Pydantic v2).
+3. Tất cả các commit trong PR tuân thủ đúng chuẩn Conventional Commits 1.0.0.
+4. Không có file nhạy cảm (`.env`, log, cache `.pytest_cache`, `.venv`) bị commit vào git.
+5. Đã cập nhật tài liệu liên quan (`DESIGN.md`, `README.md` hoặc `SPEC.md`) nếu có thay đổi về schema hoặc endpoint API.
 
 ---
 
