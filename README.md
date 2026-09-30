@@ -266,12 +266,14 @@ k6 run tests/load/k6-spike-test.js
 
 Tuân thủ quy định tại mục 19 của tài liệu `DESIGN.md`:
 
-### Các phần có sự hỗ trợ của AI:
-- Gợi ý cấu trúc phân tầng kiến trúc và phác thảo tài liệu kỹ thuật ban đầu.
-- Hỗ trợ xây dựng các kịch bản kiểm thử cạnh tranh (Concurrency Tests) và phục hồi lỗi (Failure Tests).
-- Đề xuất các cấu hình tối ưu Pydantic models và container multi-stage build.
+### Các phần do người phát triển (Candidate) chịu trách nhiệm và làm chủ:
+- **Định hướng kiến trúc & Phân tích nghiệp vụ:** Trực tiếp phân tích đề bài, xác định các ràng buộc cốt lõi (chạy trên máy đơn, nguyên tắc Exactly-Once Update, chống stale data, cơ chế phục hồi lỗi).
+- **Prompt Design & Kỹ thuật chỉ dẫn:** Xây dựng hệ thống prompt kỹ thuật chi tiết, thiết kế data contract, đặc tả API và chỉ đạo quá trình chuyển đổi toàn diện hệ thống từ TypeScript sang Python theo yêu cầu của nhà tuyển dụng.
+- **Quyết định giải pháp cốt lõi:** Lựa chọn kiến trúc pipeline xử lý Exactly-Once tập trung, cơ chế băm dữ liệu tất định (`sort_keys_recursively` + SHA-256) và chiến lược quản lý transaction / checkpoint.
+- **Rà soát & Kiểm chứng thực nghiệm:** Trực tiếp nghiệm thu, sửa lỗi logic, tối ưu hóa hiệu năng và kiểm chứng 100% các bài test tự động (Pytest, Concurrency, Failure injection, k6 spike load) trước khi đóng gói phát hành.
 
-### Các phần do người phát triển chịu trách nhiệm và làm chủ:
-- Ra quyết định lựa chọn kiến trúc xử lý Exactly-Once tập trung tại một pipeline chung.
-- Triển khai toàn bộ mã nguồn logic nghiệp vụ, quản lý transaction và cơ chế băm dữ liệu tất định.
-- Rà soát, gỡ lỗi và kiểm chứng thực nghiệm 100% các bài test trước khi đóng gói phát hành.
+### Các phần có sự hỗ trợ của AI (AI-assisted execution):
+- Sinh mã nguồn khung (boilerplate / scaffolding) theo đúng prompt và thiết kế chi tiết do ứng viên cung cấp.
+- Hỗ trợ triển khai nhanh các kịch bản kiểm thử (fixtures, test case mẫu cho concurrency và failure injection).
+- Hỗ trợ chuyển đổi cú pháp models từ TypeScript interface sang Pydantic v2 và cấu hình Dockerfile multi-stage.
+- Hỗ trợ rà soát cú pháp và phác thảo tài liệu kỹ thuật dựa trên luồng kiến trúc đã được định hướng.

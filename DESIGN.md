@@ -577,24 +577,23 @@ Performance threshold nên được báo cáo theo máy chạy test thay vì tuy
 
 ## 19. AI usage disclosure
 
-Trong README/demo nên có section:
+Trong README/demo có section:
 
 ```md
 ## AI usage
 
-AI was used for:
-- brainstorming architecture,
-- generating initial documentation,
-- suggesting test cases,
-- reviewing code.
-
 Candidate-owned work:
-- final architecture decisions,
-- implementation,
-- debugging,
-- validation,
-- test execution,
-- explanation during demo.
+- Định hướng kiến trúc, phân tích bài toán và các ràng buộc phi chức năng (Single machine, Exactly-Once, Resilience).
+- Kỹ thuật thiết kế prompt chi tiết (Prompt Engineering & Data Contract Specification) để chỉ đạo AI sinh mã nguồn.
+- Ra quyết định kỹ thuật cốt lõi: pipeline xử lý tập trung, thuật toán băm tất định (recursive sort keys + SHA-256), cơ chế lock theo sản phẩm.
+- Rà soát mã nguồn, sửa lỗi logic, tối ưu hóa và kiểm chứng thực nghiệm 100% các bài test (Pytest, Concurrency, Failure).
+- Trình bày, giải thích và chịu trách nhiệm toàn diện về giải pháp trong buổi bảo vệ/demo.
+
+AI was used for:
+- Sinh mã nguồn khung (boilerplate / scaffolding) theo đúng prompt kỹ thuật chi tiết của ứng viên.
+- Chuyển đổi mã nguồn và định dạng sang chuẩn Python (FastAPI, Pydantic v2, Asyncpg).
+- Đề xuất và mở rộng các test fixtures, kịch bản kiểm thử cạnh tranh (Concurrency) và tiêm lỗi (Failure).
+- Hỗ trợ rà soát cú pháp tài liệu kỹ thuật theo định hướng kiến trúc đã vạch ra.
 ```
 
 Điều quan trọng là khai báo đúng thực tế bạn đã dùng AI ở đâu.

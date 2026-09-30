@@ -177,11 +177,12 @@ apps/cdms/src/
 │   ├── canonical/        # Chuẩn hóa dữ liệu và tính hash ổn định
 │   ├── detector/         # So sánh trạng thái để xác định dữ liệu mới/thay đổi
 │   └── pipeline/         # Điều phối luồng xử lý chung cho 3 nguồn ingestion
-├── repositories/         # Giao tiếp với cơ sở dữ liệu (PostgreSQL)
-│   ├── change.repository.ts
-│   └── idempotency.repository.ts
-├── db/                   # Database connection pool, migrations, seed
-└── app.ts                # Bootstrap và khởi tạo server
+├── repositories/         # Giao tiếp với cơ sở dữ liệu (PostgreSQL / In-memory)
+│   ├── change_repo.py
+│   ├── idempotency_repo.py
+│   └── checkpoint_repo.py
+├── db/                   # Database connection pool (asyncpg), migrations, MemoryDatabaseClient
+└── main.py               # Bootstrap và khởi tạo FastAPI server
 ```
 
 ### 5.2 Quy tắc phụ thuộc giữa các tầng (Dependency Rules)
@@ -198,33 +199,27 @@ apps/cdms/src/
 
 ### 6.1 Chuẩn hóa dữ liệu (Canonicalization)
 Để đảm bảo cùng một đối tượng dữ liệu từ 3 nguồn (Polling, Webhook, Excel) cho ra giá trị nhận diện giống nhau:
-1. **Trim chuỗi ký tự:** Mọi giá trị string như `id`, `sku`, `name` phải được cắt bỏ khoảng trắng đầu/cuối (`trim()`).
-2. **Chuẩn hóa số học:** Chuyển đổi định dạng số (string hoặc number) về kiểu `number` chính xác, làm tròn theo quy tắc kế toán nếu có phần thập phân.
-3. **Chuẩn hóa ngày tháng:** Mọi mốc thời gian phải được parse về UTC ISO-8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`) trước khi so sánh hoặc tính hash.
+1. **Trim chuỗi ký tự:** Mọi giá trị string như `id`, `sku`, `name` phải được cắt bỏ khoảng trắng đầu/cuối (`strip()`).
+2. **Chuẩn hóa số học:** Chuyển đổi định dạng số (string hoặc number) về kiểu `float` hoặc `int` chính xác, làm tròn theo quy tắc kế toán nếu có phần thập phân.
+3. **Chuẩn hóa ngày tháng:** Mọi mốc thời gian phải được parse về UTC ISO-8601 string (`YYYY-MM-DDTHH:mm:ss+00:00`) trước khi so sánh hoặc tính hash.
 4. **Sắp xếp khóa JSON (Deterministic Hash):** Trước khi tính hash SHA-256, toàn bộ các khóa trong object phải được sắp xếp theo thứ tự bảng chữ cái đệ quy.
 
-```ts
-import { createHash } from "node:crypto";
+```python
+import hashlib
+import json
+from typing import Any
 
-export function sortKeysRecursively(obj: unknown): unknown {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(sortKeysRecursively);
-  }
-  const sortedKeys = Object.keys(obj as Record<string, unknown>).sort();
-  const result: Record<string, unknown> = {};
-  for (const key of sortedKeys) {
-    result[key] = sortKeysRecursively((obj as Record<string, unknown>)[key]);
-  }
-  return result;
-}
+def sort_keys_recursively(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {k: sort_keys_recursively(obj[k]) for k in sorted(obj.keys())}
+    if isinstance(obj, list):
+        return [sort_keys_recursively(item) for item in obj]
+    return obj
 
-export function computePayloadHash(payload: object): string {
-  const canonicalString = JSON.stringify(sortKeysRecursively(payload));
-  return createHash("sha256").update(canonicalString).digest("hex");
-}
+def compute_payload_hash(payload: dict[str, Any]) -> str:
+    canonical = sort_keys_recursively(payload)
+    serialized = json.dumps(canonical, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 ```
 
 ### 6.2 Chiến lược Idempotency
