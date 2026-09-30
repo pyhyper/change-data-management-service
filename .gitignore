@@ -21,3 +21,11 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Python
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/

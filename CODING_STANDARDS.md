@@ -43,9 +43,20 @@
 
 ---
 
-## 3. Quy chuẩn TypeScript & Node.js
+## 3. Quy chuẩn Ngôn ngữ Lập trình (Python & TypeScript)
 
-### 3.1 Cấu hình trình biên dịch (tsconfig.json)
+### 3.1 Quy chuẩn Backend Python (PEP 8 & Pydantic v2)
+1. **Tiêu chuẩn phiên bản:** Python 3.11+ (khuyến nghị Python 3.13).
+2. **Khai báo kiểu dữ liệu bắt buộc (Type Hints):**
+   - Mọi hàm, phương thức, thuộc tính bắt buộc khai báo Type Annotations (`typing`).
+   - Sử dụng Pydantic v2 `BaseModel` để validate toàn bộ dữ liệu đi vào hệ thống (DTO).
+   - Hạn chế dùng `Any`; ưu tiên dùng TypeVar, Union, hoặc Generic có ràng buộc.
+3. **Lập trình Bất đồng bộ (Asyncio):**
+   - Tận dụng `async/await` với FastAPI, `httpx.AsyncClient` và `asyncpg`.
+   - Cấm sử dụng các lời gọi blocking I/O (như `time.sleep()`, đồng bộ socket) trong async loop; bắt buộc dùng `asyncio.sleep()` hoặc offload sang thread pool.
+4. **Định dạng mã nguồn:** Tuân thủ chặt chẽ PEP 8 (indentation 4 spaces, snake_case cho hàm/biến, PascalCase cho class, UPPER_SNAKE_CASE cho hằng số).
+
+### 3.2 Cấu hình trình biên dịch TypeScript (Tham chiếu)
 Dự án bắt buộc bật các cờ nghiêm ngặt sau:
 
 ```json

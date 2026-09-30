@@ -1,7 +1,7 @@
 # DESIGN.md — CDMS Detailed Design
 
-> Đây là thiết kế triển khai đề xuất cho bài test.  
-> Đề bài không ép framework cụ thể; tài liệu chọn **Node.js + TypeScript + Express + PostgreSQL** để minh họa rõ implementation.
+> Đây là thiết kế triển khai chi tiết cho bài test.  
+> Theo yêu cầu: Phần Back End được triển khai trên nền tảng **Python 3 + FastAPI + Pydantic + PostgreSQL**.
 
 ---
 

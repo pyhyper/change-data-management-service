@@ -80,37 +80,39 @@ cdms-project/
 
 ## 3. Yêu cầu môi trường
 
-- **Node.js:** Phiên bản `>= 20.x` (đã kiểm tra tương thích trên Node.js v23).
-- **npm:** Phiên bản `>= 10.x`.
+- **Python:** Phiên bản `>= 3.11` (khuyến nghị Python 3.13).
+- **Node.js:** (Tùy chọn cho bản TypeScript tham chiếu).
 - **Docker & Docker Compose:** (Tùy chọn, dùng khi muốn chạy toàn bộ trên container hóa).
 
 ---
 
 ## 4. Hướng dẫn cài đặt và khởi chạy
 
-### Cách 1: Chạy trực tiếp bằng Node.js (Phát triển cục bộ)
+### Cách 1: Chạy trực tiếp Backend Python (Khuyên dùng)
 
-1. Cài đặt các gói phụ thuộc:
+1. Tạo môi trường ảo và cài đặt thư viện:
    ```bash
-   npm install
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
    ```
 
-2. Biên dịch kiểm tra mã nguồn TypeScript:
+2. Khởi động Inventory Emulator (chạy trên cổng `3001`):
    ```bash
-   npm run build
+   python3 -m src.emulator.main
    ```
 
-3. Khởi động Inventory Emulator (chạy trên cổng `3001`):
+3. Khởi động CDMS Service (chạy trên cổng `3000` ở cửa sổ terminal khác):
    ```bash
-   npm run start:emulator
+   python3 -m src.cdms.main
    ```
 
-4. Khởi động CDMS Service (chạy trên cổng `3000` ở cửa sổ terminal khác):
+4. Chạy toàn bộ các bài kiểm thử tự động với Pytest:
    ```bash
-   npm run start:cdms
+   pytest
    ```
 
-> Lưu ý: Mặc định khi không có PostgreSQL daemon đang chạy, hệ thống tự động kích hoạt `MemoryDatabaseClient` mô phỏng đầy đủ hành vi transaction, khóa mutex và ràng buộc khóa duy nhất của PostgreSQL để phục vụ phát triển và kiểm thử mà không cần cài đặt database ngoài.
+> Lưu ý: Mặc định khi không có PostgreSQL daemon ngoài, hệ thống tự động kích hoạt `MemoryDatabaseClient` mô phỏng đầy đủ hành vi transaction, khóa mutex và ràng buộc khóa duy nhất của PostgreSQL để phục vụ phát triển và kiểm thử mà không cần cài đặt database ngoài.
 
 ### Cách 2: Chạy toàn bộ bằng Docker Compose (PostgreSQL + CDMS + Emulator)
 
